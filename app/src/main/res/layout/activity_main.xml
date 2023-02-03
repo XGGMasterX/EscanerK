@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".MainActivity">
+
+
+
+
+    <TextView
+        android:id="@+id/TextNombre"
+        android:layout_width="255dp"
+        android:layout_height="21dp"
+        android:layout_margin="@dimen/cardview_compat_inset_shadow"
+        android:text="--------------------------------------------------------------------------"
+        android:textColor="@color/yellow"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.534"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.251"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/TextCode"
+        android:layout_width="121dp"
+        android:layout_height="21dp"
+        android:text="Producto: 000"
+        android:textColor="@color/yellow"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.367"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/TextCantidad"
+        android:layout_width="121dp"
+        android:layout_height="20dp"
+        android:text="Cantidad: 0"
+        android:textColor="@color/yellow"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.435"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/btnLigth"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="92dp"
+        android:layout_height="46dp"
+        android:backgroundTint="@color/white"
+        android:text="Flash"
+        android:textColor="@color/purple_200"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.949"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.056"
+        app:strokeColor="@color/blue" />
+
+    <Button
+        android:id="@+id/down"
+        android:layout_width="40dp"
+        android:layout_height="42dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/purple_200"
+        style="?attr/materialButtonOutlinedStyle"
+        app:strokeColor="@color/blue"
+        android:text="-"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.247"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.433" />
+
+
+
+    <Button
+        android:id="@+id/up"
+        android:layout_width="40dp"
+        android:layout_height="42dp"
+        android:text="+"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/purple_200"
+        style="?attr/materialButtonOutlinedStyle"
+        app:strokeColor="@color/blue"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.105"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.433" />
+
+    <Button
+        android:id="@+id/Put"
+        android:layout_width="165dp"
+        android:layout_height="63dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/purple_200"
+        style="?attr/materialButtonOutlinedStyle"
+        app:strokeColor="@color/red"
+        android:text="Enviar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.626" />
+
+    <Button
+        android:id="@+id/btnScanner"
+        android:layout_width="221dp"
+        android:layout_height="51dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/purple_200"
+        style="?attr/materialButtonOutlinedStyle"
+        app:strokeColor="@color/blue"
+        android:text="Escanear"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.75" />
+
+
+    <Button
+        android:id="@+id/btnLista"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="92dp"
+        android:layout_height="46dp"
+        android:backgroundTint="@color/white"
+        android:text="Lista"
+        android:textColor="@color/purple_200"
+        android:onClick="abrirLista"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.056"
+        app:strokeColor="@color/blue" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
