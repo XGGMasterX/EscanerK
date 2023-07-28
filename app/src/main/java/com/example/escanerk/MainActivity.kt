@@ -1,7 +1,6 @@
 package com.example.escanerk
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
@@ -9,7 +8,7 @@ import android.hardware.camera2.CameraManager
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
-import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -28,27 +27,27 @@ import java.net.ProtocolException
 import java.net.URL
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
-
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(){
 
 
-
+    private val objEscaner : Escaner = Escaner()
     private val objPut = PutAPI()
+    private val objLista = ListaProductos()
     private var flash = false
     private lateinit var binding:ActivityMainBinding
     private var firstScann = false
     private var scannResult = false
-    private var thisIntegrator = IntentIntegrator(this)
-
-
-
+    private var integrator :IntentIntegrator? = null
+    private var api = ConsumoAPI()
+    @SuppressLint("MissingInflatedId")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
-
         var camera : CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -60,16 +59,34 @@ class MainActivity : AppCompatActivity(){
         //yellow 229,218,1
 
         binding.TextNombre.setBackgroundColor(Color.WHITE)
-        binding.TextNombre.setTextColor(Color.rgb(229,218,1))
+        binding.TextNombre.setTextColor(Color.BLACK)
+        binding.TextNombre.setTextSize(1, 20.0F);
         binding.TextCode.setBackgroundColor(Color.WHITE)
-        binding.TextCode.setTextColor(Color.rgb(229,218,1))
+        binding.TextCode.setTextColor(Color.BLACK)
+        binding.TextCode.setTextSize(1, 20.0F);
         binding.TextCantidad.setBackgroundColor(Color.WHITE)
-        binding.TextCantidad.setTextColor(Color.rgb(229,218,1))
+        binding.TextCantidad.setTextColor(Color.BLACK)
+        binding.TextCantidad.setTextSize(1, 20.0F);
 
         //Cuando se presione el Botton = Flash se ejecuta:
         binding.btnLigth.setTextColor(Color.rgb(0 , 182 , 255))
         binding.btnLigth.setOnClickListener{
-            thisIntegrator = Flash(camera)
+
+            if (!flash) {
+                binding.btnLigth.setBackgroundColor(Color.rgb(0 , 182 , 255))
+                binding.btnLigth.setTextColor(Color.WHITE)
+                flash = true
+                integrator = IntentIntegrator(this)
+                integrator = objEscaner.Flash(camera, flash, integrator!!)
+            }
+            else if(flash){
+                //.rgb(187, 134, 252)
+                binding.btnLigth.setBackgroundColor(Color.WHITE)
+                binding.btnLigth.setTextColor(Color.rgb(0 , 182 , 255))
+                flash = false
+                integrator = IntentIntegrator(this)
+                integrator = objEscaner.Flash(camera, flash, integrator!!)
+            }
 
         }
 
@@ -77,19 +94,28 @@ class MainActivity : AppCompatActivity(){
         binding.btnScanner.setTextColor(Color.rgb(0 , 182 , 255))
         binding.btnScanner.setOnClickListener{
 
+            integrator = IntentIntegrator(this)
+            api.setObjListaProductos(objLista)
             if(firstScann)
             {
                 alertaDeseaEscannear()
             }
             else{
-                initScanner()
+                objEscaner.initScanner(flash, integrator!!)
             }
         }
         binding.up.setTextColor(Color.rgb(0 , 182 , 255))
         binding.up.setOnClickListener{
-            if((Integer.parseInt(cantidad)) < 100)
+            if((Integer.parseInt(cantidad)) < 100 && (Integer.parseInt(cantidad)) >= 0)
             {
                 upCantidad()
+            }
+            else if((Integer.parseInt(cantidad)) < 0)
+            {
+                this.cantidad = "0";
+                binding.TextCantidad.text = defCantidad + cantidad
+                objPut.setCantidad(this.cantidad)
+                println(binding.TextCantidad.text)
             }
         }
         binding.down.setTextColor(Color.rgb(0 , 182 , 255))
@@ -98,55 +124,98 @@ class MainActivity : AppCompatActivity(){
             {
                downCantidad()
             }
+            else if((Integer.parseInt(cantidad)) <= 0)
+            {
+                this.cantidad = "-99999";
+                binding.TextCantidad.text = defCantidad + cantidad
+                objPut.setCantidad(this.cantidad)
+                println(binding.TextCantidad.text)
+            }
         }
         binding.Put.setTextColor(Color.rgb(252,99,134))
         binding.Put.setOnClickListener{
-               if(firstScann && Integer.parseInt(cantidad) > 0 && scannResult)
+               if(firstScann && Integer.parseInt(cantidad) != 0 && scannResult)
                {
                    println("====================ANTES DE PUT====================")
                    GlobalScope.launch(Dispatchers.Main) {
                        withContext(Dispatchers.IO) {
-
-
                            objPut.Start()
                            println("====================FINAL DE PUT====================")
                        }//android.os.NetworkOnMainThreadException
-
                    }
                    alertaEnviado()
                    resetValues()
                }
-               else if(!firstScann){
-
+               else if(firstScann == false){
                    alertaScanneoMissing()
-
                }
                else if(Integer.parseInt(cantidad) <= 0)
                {
                    alertaCantidadNull()
                }
-               else if(!scannResult)
+               else if(scannResult == false)
                {
                    alertaErrorDeEscanneo()
                }
         }
 
-            fun abrirLista(view: View) {
+        val ListaI = Intent(this, ListaProductos::class.java)
+        val ListarI = Intent(this, Listar::class.java)
+        val MainActivityI = Intent(this, MainActivity::class.java)
+        val StockI = Intent(this, Stock::class.java)
 
-                val intent = Intent(this, ListaProductos::class.java).apply {  }
-                startActivity(intent)
+        val btnLista: Button = findViewById(R.id.btnLista)
+        val btnWeb: Button = findViewById(R.id.btnWebMainActivity)
+        val btnStock: Button = findViewById(R.id.btnStockMainActivity)
+        val btnListar: Button = findViewById(R.id.btnListarMainActivity)
+
+
+
+
+        btnListar.setOnClickListener {
+
+            GlobalScope.launch(Dispatchers.Main) {
+                withContext(Dispatchers.IO) {
+                    startActivity(ListarI)
+
+                }//android.os.NetworkOnMainThreadException
             }
+        }
+        btnWeb.setOnClickListener {
 
+            GlobalScope.launch(Dispatchers.Main) {
+                withContext(Dispatchers.IO) {
+                    startActivity(MainActivityI)
 
+                }//android.os.NetworkOnMainThreadException
+            }
+        }
+        btnStock.setOnClickListener {
+
+            GlobalScope.launch(Dispatchers.Main) {
+                withContext(Dispatchers.IO) {
+                    startActivity(StockI)
+
+                }//android.os.NetworkOnMainThreadException
+            }
+        }
+        btnLista.setOnClickListener{
+            GlobalScope.launch(Dispatchers.Main) {
+                withContext(Dispatchers.IO) {
+                    startActivity(ListaI)
+                    //objLista.readList()
+                }//android.os.NetworkOnMainThreadException
+            }
+        }
     }
-
-
 
     private fun getIsScann(b : Boolean){
         this.firstScann = b;
     }
 
-
+    fun getConsumoApi():ConsumoAPI{
+        return api
+    }
 
     @SuppressLint("SuspiciousIndentation")
     @RequiresApi(Build.VERSION_CODES.M)
@@ -156,12 +225,16 @@ class MainActivity : AppCompatActivity(){
             builder.setMessage("Falta Realizar Escanneo")
         builder.setPositiveButton("Escanear",DialogInterface.OnClickListener{
             dialog,witch -> Toast.makeText(this,"Realizando Escanneo",Toast.LENGTH_LONG).show()
-            initScanner()
+            objEscaner.initScanner(flash, integrator!!)
         })
         builder.setNegativeButton("Cancelar",DialogInterface.OnClickListener{
             dialog,witch -> Toast.makeText(this,"Envio Cancelado",Toast.LENGTH_LONG).show()
             var camera : CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-            thisIntegrator = FlashApagado(camera)
+            //.rgb(187, 134, 252)
+            binding.btnLigth.setBackgroundColor(Color.WHITE)
+            binding.btnLigth.setTextColor(Color.rgb(0 , 182 , 255))
+            flash = false
+            integrator = objEscaner.Flash(camera,flash, integrator!!)
         })
 
         builder.show()
@@ -198,12 +271,12 @@ class MainActivity : AppCompatActivity(){
         builder.setMessage("Esta Por Realizar Otro Escanneo , Los Datos Actuales Se Perderan")
         builder.setPositiveButton("Escanear",DialogInterface.OnClickListener{
                 dialog,witch -> Toast.makeText(this,"Realizando Escanneo",Toast.LENGTH_LONG).show()
-            initScanner()
+            objEscaner.initScanner(flash, integrator!!)
         })
         builder.setNegativeButton("Cancelar",DialogInterface.OnClickListener{
                 dialog,witch -> Toast.makeText(this,"Escanneo Cancelado",Toast.LENGTH_LONG).show()
                 var camera : CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-                thisIntegrator = FlashApagado(camera)
+                integrator = objEscaner.Flash(camera,flash, integrator!!)
         })
 
         builder.show()
@@ -216,12 +289,12 @@ class MainActivity : AppCompatActivity(){
         builder.setMessage("Ah Ocurrido Un Error En El Escanneo , Debe Volver A Realizarlo , De Lo Contrario No Podra Continuar")
         builder.setPositiveButton("Escannear",DialogInterface.OnClickListener{
                 dialog,witch -> Toast.makeText(this,"Realizando Escanneo",Toast.LENGTH_LONG).show()
-            initScanner()
+            objEscaner.initScanner(flash, integrator!!)
         })
         builder.setNegativeButton("Cancelar",DialogInterface.OnClickListener{
                 dialog,witch -> Toast.makeText(this,"Escanneo Cancelado",Toast.LENGTH_LONG).show()
                 var camera : CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-                thisIntegrator = FlashApagado(camera)
+                integrator = objEscaner.Flash(camera,flash, integrator!!)
         })
 
         builder.show()
@@ -229,19 +302,11 @@ class MainActivity : AppCompatActivity(){
 
 
     //Iniciando el Scanner
-    private fun initScanner() {
-        val integrator = thisIntegrator
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_8)
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
-        integrator.setTorchEnabled(flash)
-        integrator.initiateScan()
 
-    }
     private var nombre = "null"
     private var producto = "null"
 
-    private var defProducto = "Producto: "
+    private var defProducto = ""
 
     private fun setProducto(nombre :String , producto : String){
         this.producto = producto
@@ -270,75 +335,6 @@ class MainActivity : AppCompatActivity(){
 
     //Encender Flash
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun Flash(c : CameraManager): IntentIntegrator {
-        val integrator = IntentIntegrator(this)
-        var cameraId: Array<String>? = arrayOf("")
-
-
-        try {
-
-            if (!flash) {
-                binding.btnLigth.setBackgroundColor(Color.rgb(0 , 182 , 255))
-                binding.btnLigth.setTextColor(Color.WHITE)
-                flash = true
-                integrator.setTorchEnabled(flash)
-                cameraId?.set(0, c.getCameraIdList()[0])
-                c.setTorchMode(cameraId?.get(0).toString(), flash)
-
-                return integrator
-            }
-
-
-            //.rgb(187, 134, 252)
-
-
-
-            binding.btnLigth.setBackgroundColor(Color.WHITE)
-            binding.btnLigth.setTextColor(Color.rgb(0 , 182 , 255))
-            flash = false
-            integrator.setTorchEnabled(flash)
-            cameraId?.set(0, c.getCameraIdList()[0])
-            c.setTorchMode(cameraId?.get(0).toString(), flash)
-
-            return integrator
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return integrator
-        }
-
-    }
-
-        @RequiresApi(Build.VERSION_CODES.M)
-        private fun FlashApagado(c : CameraManager) : IntentIntegrator {
-            val integrator = IntentIntegrator(this)
-            var cameraId : Array<String>?   = arrayOf("")
-
-
-            try {
-
-                //.rgb(187, 134, 252)
-                binding.btnLigth.setBackgroundColor(Color.WHITE)
-                binding.btnLigth.setTextColor(Color.rgb(0 , 182 , 255))
-                flash = false
-                integrator.setTorchEnabled(flash)
-                cameraId?.set(0, c.getCameraIdList()[0])
-                c.setTorchMode(cameraId?.get(0).toString(),flash)
-
-                return integrator
-
-            }
-
-
-        catch (e : Exception){
-            e.printStackTrace()
-            return integrator
-        }
-
-
-    }
-
     private var ScannCod = "null"
 
     private fun setScann(resultado: IntentResult)
@@ -351,7 +347,7 @@ class MainActivity : AppCompatActivity(){
     }
 
     private var cantidad = "0"
-    private var defCantidad = "Cantidad: "
+    private var defCantidad = ""
 
     private fun upCantidad(){
         if(cantidad != "null")
@@ -380,58 +376,73 @@ class MainActivity : AppCompatActivity(){
         cantidad = "0"
     }
 
-
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
+        var camera: CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
         val result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data)
         if(result != null)
         {
-            if(result.contents == null)
-            {
-                Toast.makeText(this,"Cancelado",Toast.LENGTH_SHORT).show()
-                var camera : CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-                thisIntegrator = FlashApagado(camera)
+            if(result.contents == null) {
+                Toast.makeText(this, "Cancelado", Toast.LENGTH_SHORT).show()
             }
             else
             {
-                var camera : CameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-                thisIntegrator = FlashApagado(camera)
-                Toast.makeText(this,"El Valor Escaneado Es: ${result.contents}",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"El Valor Escaneado Es: ${result.contents}", Toast.LENGTH_SHORT).show()
                 resetValues()
                 setScann(result)
-                var api = ConsumoAPI()
                 GlobalScope.launch(Dispatchers.Main) {
                     withContext(Dispatchers.IO) {
                         println("====================ANTES DE OBJETO====================")
                         api.searchByCode(result)
-                    }//android.os.NetworkOnMainThreadException
+                    }
+                    //android.os.NetworkOnMainThreadException
                     getIsScann(true)
                     setProducto(api.getProductoNombre(),api.getProductoCodigo())
                     objPut.setCodigo(producto)
                     objPut.setCantidad("0")
+                    objLista.setApi(api)
                 }
-
-
-
+                flash = false;
+            }
+            if (!flash) {
+                //.rgb(187, 134, 252)
+                binding.btnLigth.setBackgroundColor(Color.WHITE)
+                binding.btnLigth.setTextColor(Color.rgb(0, 182, 255))
+                integrator = objEscaner.Flash(camera, flash, integrator!!)
+            }
+            else if(flash){
+                //.rgb(187, 134, 252)
+                binding.btnLigth.setBackgroundColor(Color.rgb(0 , 182 , 255))
+                binding.btnLigth.setTextColor(Color.WHITE)
+                integrator = objEscaner.Flash(camera, flash, integrator!!)
             }
         }
         else
         {
             super.onActivityResult(requestCode, resultCode, data)
         }
-
         super.onActivityResult(requestCode, resultCode, data)
-
     }
-
 }
 
 class ConsumoAPI {
 
     private var codigo = "null"
     private var nombre = "null"
+    private var objListaProductos : ListaProductos? = null
+    private var arrayListJSON : ArrayList<String>? = null
+    fun setObjListaProductos(obj : ListaProductos){
+        this.objListaProductos = obj
+    }
+    private fun JSONArray.toArrayList(): ArrayList<String> {
+        val list = arrayListOf<String>()
+        for (i in 0 until this.length()) {
+            list.add(this.getString(i))
+        }
 
+        return list
+    }
 
     fun searchByCode(query: IntentResult) {
         val taskk = Objecto()
@@ -441,15 +452,16 @@ class ConsumoAPI {
         if(comprobation != null)
         {
             try {
-                var jsonArray = comprobation
-                var jsonObject = jsonArray.getJSONObject(0)
+                var jsonArrayMaster = comprobation
+                var jsonObject = jsonArrayMaster.getJSONObject(0)//CORREGIR PRODUCTO NULL LUEGO DE PRIMER CARGA
                 println("=============================IMPRIMIENDO=================================")
                 this.codigo = jsonObject.getString("codigo")
                 this.nombre = jsonObject.getString("nombre")
-
                 println("Codigo: $codigo")
                 println("Nombre: $nombre")
-
+                objListaProductos?.createListImage(jsonObject.getString("imagen"))
+                objListaProductos?.createListNombre(jsonObject.getString("nombre"))
+                objListaProductos?.createListCode(jsonObject.getString("codigo"))
 
             }
             catch (e: Exception)
@@ -530,11 +542,11 @@ class ExecuteTaskThread : Thread() {
     private var jsonArray = JSONArray()
     private var isJsonNull = true
 
-    public fun getStateJson():Boolean{
+     fun getStateJson():Boolean{
         return this.isJsonNull
     }
 
-    public fun getJson(): JSONArray {
+    fun getJson(): JSONArray {
         println("=======================GET JSON=======================================")
         return this.jsonArray
     }
@@ -545,11 +557,11 @@ class ExecuteTaskThread : Thread() {
         isJsonNull = false
     }
 
-    public fun getResultado(p : String){
+    fun getResultado(p : String){
         this.resultado = p
     }
 
-    public override fun run() {
+    override fun run() {
         try{
             var responseCode: Int? = null
             //
@@ -575,6 +587,7 @@ class ExecuteTaskThread : Thread() {
 
 
                         setJson(informationString.toString())
+                        println(informationString)
                         super.run()
                     }
 

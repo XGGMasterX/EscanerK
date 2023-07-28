@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        tools:context=".ListaProductos">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ProductosListados">
 
     <Button
-        android:id="@+id/btnWebListaProductos"
+        android:id="@+id/btnWebProductosListados"
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="104dp"
         android:layout_height="54dp"
         android:backgroundTint="@color/white"
+        android:onClick="abrirLista"
         android:text="Web"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,11 +35,12 @@
         app:layout_constraintStart_toStartOf="parent"></Spinner>
 
     <Button
-        android:id="@+id/btnStockListaProductos"
+        android:id="@+id/btnStockProductosListados"
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="104dp"
         android:layout_height="54dp"
         android:backgroundTint="@color/white"
+        android:onClick="abrirLista"
         android:text="Stock"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,11 +51,12 @@
         app:strokeColor="@color/blue" />
 
     <Button
-        android:id="@+id/btnListarListaProductos"
+        android:id="@+id/btnListarProductosListados"
         style="?attr/materialButtonOutlinedStyle"
         android:layout_width="104dp"
         android:layout_height="54dp"
         android:backgroundTint="@color/white"
+        android:onClick="abrirLista"
         android:text="Listar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -65,9 +68,5 @@
 
 
 
+
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-

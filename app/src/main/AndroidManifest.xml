@@ -22,7 +22,15 @@
         <activity
             android:name=".ListaProductos"
             android:exported="true"/>
-
+        <activity
+            android:name=".Listar"
+            android:exported="true"/>
+        <activity
+            android:name=".ProductosListados"
+            android:exported="true"/>
+        <activity
+            android:name=".Stock"
+            android:exported="true"/>
 
 
         <activity
