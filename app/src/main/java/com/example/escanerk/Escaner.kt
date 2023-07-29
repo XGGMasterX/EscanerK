@@ -7,8 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.integration.android.IntentIntegrator
 
 class Escaner : AppCompatActivity(){
-
+     private var flash : Boolean = false
      fun initScanner(flash : Boolean,integrator: IntentIntegrator) {
+             this.flash = flash
              integrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
              integrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_8)
              integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
