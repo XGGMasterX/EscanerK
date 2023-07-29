@@ -3,13 +3,16 @@ package com.example.escanerk
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import java.util.Arrays
 
 class ListaProductos : AppCompatActivity() {
 
@@ -18,7 +21,9 @@ class ListaProductos : AppCompatActivity() {
     private var listProductosImg : Array<String> = arrayOf("NULL")
     private var listProductosCodigo : Array<String>  = arrayOf("NULL")
     private var listProductosNombre : Array<String> = arrayOf("NULL")
-
+    private lateinit var arrayAdapter : ArrayAdapter<*>
+    private var lvProductos : ListView? = null
+    private var listArray: ArrayList<String>? = null
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +36,11 @@ class ListaProductos : AppCompatActivity() {
         val btnWeb: Button = findViewById(R.id.btnWebListaProductos)
         val btnStock: Button = findViewById(R.id.btnStockListaProductos)
         val btnListar: Button = findViewById(R.id.btnListarListaProductos)
+        this.lvProductos =  findViewById(R.id.lvListaProductos)
+        this.listArray = listProductosNombre as ArrayList<String>
+        this.arrayAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, listArray!!)
+        this.lvProductos?.adapter = arrayAdapter
+
 
         btnWeb.setOnClickListener {
 
@@ -89,18 +99,23 @@ class ListaProductos : AppCompatActivity() {
         }
         readCode()
     }
-
-    fun readImagen(){
-        var i = 0
-        for( i : String in listProductosImg){
+    fun readNombre(){
+        var n = 0
+        this.listArray = listProductosNombre as ArrayList<String> //SOLUCIONAR CONVERSION
+                                                                  //VER SI ES POSIBLE DIVIDIR COD
+        for( i : String in listProductosNombre){
             if(i != "NULL"){
+
+                //this.arrayAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, listArray!!)
+                this.lvProductos?.adapter = arrayAdapter
                 println(i+"1")
             }
         }
     }
-    fun readNombre(){
-        var n = 0
-        for( i : String in listProductosNombre){
+
+    fun readImagen(){
+        var i = 0
+        for( i : String in listProductosImg){
             if(i != "NULL"){
                 println(i+"1")
             }
