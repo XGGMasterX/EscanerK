@@ -7,12 +7,18 @@
         android:background="@color/white"
         tools:context=".ListaProductos">
 
-    <LinearLayout
-        android:layout_width="408dp"
-        android:layout_height="651dp"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="2dp"
-        tools:layout_editor_absoluteY="122dp">
+        <RelativeLayout
+        android:layout_width="410dp"
+        android:layout_height="626dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="23dp"
+        tools:layout_editor_absoluteY="75dp"
+            tools:ignore="MissingConstraints">
+
+        <TextView
+            android:layout_width="320dp"
+            android:layout_height="32dp"
+            android:text="ProductosCargados"></TextView>
 
         <ListView
             android:id="@+id/lvListaProductos"
@@ -21,7 +27,7 @@
             tools:ignore="MissingConstraints"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="101dp"></ListView>
-    </LinearLayout>
+    </RelativeLayout>
 
     <Button
         android:id="@+id/btnWebListaProductos"
