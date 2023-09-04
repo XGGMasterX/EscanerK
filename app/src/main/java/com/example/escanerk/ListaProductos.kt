@@ -18,7 +18,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ListaProductos : AppCompatActivity() {    private var api : ConsumoAPI = ConsumoAPI.getInstance()
+class ListaProductos : AppCompatActivity() {
+    
+    private var api : ConsumoAPI = ConsumoAPI.getInstance()
     override fun onResume() {
         super.onResume()
         val productListView: ListView = findViewById(R.id.productListView)
@@ -91,7 +93,7 @@ class CustomArrayAdapter(context: Context, resource: Int, objects: List<String>)
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = super.getView(position, convertView, parent)
         val textView = view.findViewById<TextView>(android.R.id.text1)
-        textView.setTextColor(Color.BLACK) // Cambia el color aquí según tus preferencias
+        textView.setTextColor(Color.BLACK) 
         return view
     }
 }
