@@ -9,6 +9,8 @@ import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -33,6 +35,7 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity(){
 
 
+
     private val objEscaner : Escaner = Escaner()
     private val objPut = PutAPI()
     private val objLista = ListaProductos()
@@ -41,7 +44,7 @@ class MainActivity : AppCompatActivity(){
     private var firstScann = false
     private var scannResult = false
     private var integrator :IntentIntegrator? = null
-    private var api = ConsumoAPI()
+    private var api = ConsumoAPI.getInstance()
     @SuppressLint("MissingInflatedId")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,7 +98,7 @@ class MainActivity : AppCompatActivity(){
         binding.btnScanner.setOnClickListener{
 
             integrator = IntentIntegrator(this)
-            api.setObjListaProductos(objLista)
+            //api.setObjListaProductos(objLista)
             if(firstScann)
             {
                 alertaDeseaEscannear()
@@ -164,12 +167,11 @@ class MainActivity : AppCompatActivity(){
         val MainActivityI = Intent(this, MainActivity::class.java)
         val StockI = Intent(this, Stock::class.java)
 
+
         val btnLista: Button = findViewById(R.id.btnLista)
         val btnWeb: Button = findViewById(R.id.btnWebMainActivity)
         val btnStock: Button = findViewById(R.id.btnStockMainActivity)
         val btnListar: Button = findViewById(R.id.btnListarMainActivity)
-
-
 
 
         btnListar.setOnClickListener {
@@ -202,12 +204,16 @@ class MainActivity : AppCompatActivity(){
         btnLista.setOnClickListener{
             GlobalScope.launch(Dispatchers.Main) {
                 withContext(Dispatchers.IO) {
+                    for(nombre in api.getProductListNombre()){
+                        println(nombre)
+                }
                     startActivity(ListaI)
-                    //objLista.readList()
                 }//android.os.NetworkOnMainThreadException
             }
         }
     }
+
+
 
     private fun getIsScann(b : Boolean){
         this.firstScann = b;
@@ -401,7 +407,6 @@ class MainActivity : AppCompatActivity(){
                     setProducto(api.getProductoNombre(),api.getProductoCodigo())
                     objPut.setCodigo(producto)
                     objPut.setCantidad("0")
-                    objLista.setApi(api)
                 }
                 flash = false;
             }
@@ -426,15 +431,51 @@ class MainActivity : AppCompatActivity(){
     }
 }
 
-class ConsumoAPI {
+class ConsumoAPI private constructor() {
 
+    private var api: ConsumoAPI? = null
+
+    companion object {
+        private var instance: ConsumoAPI? = null
+
+        fun getInstance(): ConsumoAPI {
+            if (instance == null) {
+                instance = ConsumoAPI()
+            }
+            return instance!!
+        }
+    }
+
+    private var listProductosImg : Array<String> = arrayOf("NULL")
+    private var listProductosCodigo : Array<String>  = arrayOf("NULL")
+    private var listProductosNombre : Array<String> = arrayOf("NULL")
     private var codigo = "null"
     private var nombre = "null"
-    private var objListaProductos : ListaProductos? = null
-    private var arrayListJSON : ArrayList<String>? = null
-    fun setObjListaProductos(obj : ListaProductos){
-        this.objListaProductos = obj
+
+    fun createListImage(img: String){
+        if(img != null && img!= "0") {
+            val imagen = "idealonline.com.ar/supermercado/assets/img/$img"
+            listProductosImg += imagen
+        }
     }
+
+    fun createListNombre(nam:String){
+        if(nam != null && nam!= "0") {
+            listProductosNombre += nam
+        }
+    }
+
+    fun createListCode(cod:String){
+        if(cod != null && cod!= "0") {
+            listProductosCodigo += cod
+        }
+    }
+
+
+    fun getProductListNombre() : Array<String>{
+        return listProductosNombre
+    }
+
     private fun JSONArray.toArrayList(): ArrayList<String> {
         val list = arrayListOf<String>()
         for (i in 0 until this.length()) {
@@ -459,9 +500,9 @@ class ConsumoAPI {
                 this.nombre = jsonObject.getString("nombre")
                 println("Codigo: $codigo")
                 println("Nombre: $nombre")
-                objListaProductos?.createListImage(jsonObject.getString("imagen"))
-                objListaProductos?.createListNombre(jsonObject.getString("nombre"))
-                objListaProductos?.createListCode(jsonObject.getString("codigo"))
+                createListImage(jsonObject.getString("imagen"))
+                createListNombre(jsonObject.getString("nombre"))
+                createListCode(jsonObject.getString("codigo"))
 
             }
             catch (e: Exception)
@@ -616,7 +657,7 @@ class PutAPI {
     private var codigo = "null"
     private var url = URL("https://api.idealonline.com.ar/articulos/stock/set.php?sucursal=xxxxxx&codigo=${codigo}&cantidad=${cantidad}")
     private var httpCon : HttpURLConnection = url.openConnection() as HttpURLConnection
-    private var objAPI = ConsumoAPI()
+    private var objAPI = ConsumoAPI.getInstance()
 
 
 
