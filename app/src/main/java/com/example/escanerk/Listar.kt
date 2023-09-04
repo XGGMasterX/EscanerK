@@ -381,7 +381,7 @@ class Listar : AppCompatActivity() {
                 Toast.makeText(this,"El Valor Escaneado Es: ${result.contents}", Toast.LENGTH_SHORT).show()
                 resetValues(textCantidad!!)
                 setScann(result)
-                var api = ConsumoAPI()
+                var api = ConsumoAPI.getInstance()
                 GlobalScope.launch(Dispatchers.Main) {
                     withContext(Dispatchers.IO) {
                         println("====================ANTES DE OBJETO====================")
